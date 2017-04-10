@@ -1,0 +1,11 @@
+{    
+  "development": {
+    "mongoDBConnection": "mongodb://localhost:27017",
+    "databaseName":"clearhausdb"
+  },
+  "production": {
+    "mongoDBConnection": "mongodb://rtbathula:clearhaustest@ds153730.mlab.com:53730/clearhausdb",
+    "databaseName":"clearhausdb"
+  }
+}
+
