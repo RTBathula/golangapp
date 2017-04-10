@@ -1,1 +1,1 @@
-web: ppbackend
+web: golangapp
