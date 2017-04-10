@@ -69,9 +69,6 @@ type (
 
 /*Desc   : Create new company
   Params : {name,address,city,country,email,phone,directors[],beneficials[]}
-  Returns: Promise
-           Resolve->saved success message
-           Reject->Error on find() or company name already exist or save()
 */
 func CreateNew(newCompany NewCompany) (Response,error) { 
 
@@ -130,9 +127,6 @@ func CreateNew(newCompany NewCompany) (Response,error) {
 
 /*Desc   : Get company details
   Params : company id
-  Returns: Promise
-           Resolve->company details
-           Reject->Error on find() or document not found
 */
 func GetDetails(id string) (Response,error) { 
 
@@ -170,9 +164,6 @@ func GetDetails(id string) (Response,error) {
 
 /*Desc   : Get company list
   Params : skip,limit
-  Returns: Promise
-           Resolve->company list
-           Reject->Error on find()
 */
 func GetList(skip int,limit int) (Response,error) { 
 
@@ -192,6 +183,7 @@ func GetList(skip int,limit int) (Response,error) {
     defer sessionCopy.Close()      
 
     var list []Company
+    list = []Company{}
     col:=sessionCopy.DB(databaseName).C("company") 
    
     err = col.Find(bson.M{}).Limit(limit).Skip(skip).All(&list)  
@@ -209,10 +201,7 @@ func GetList(skip int,limit int) (Response,error) {
 
 
 /*Desc   : Update company info
-  Params : companyId, {address,city,country,email,phone}
-  Returns: Promise
-           Resolve->new company
-           Reject->Error on findOneAndUpdate()
+  Params : companyId, address,city,country,email,phone
 */
 func UpdateCompany(id string,address string,city string,country string,email string,phone string) (Response,error) { 
 
@@ -277,10 +266,7 @@ func UpdateCompany(id string,address string,city string,country string,email str
 }
 
 /*Desc   : Add beneficial
-  Params : companyId, {name,email}
-  Returns: Promise
-           Resolve->new company
-           Reject->Error on findOneAndUpdate()
+  Params : companyId, name,email
 */
 func AddBeneficial(id string,name string,email string) (Response,error) { 
 
