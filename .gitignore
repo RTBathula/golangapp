@@ -1,0 +1,6 @@
+build
+vendor
+.idea
+golangapp.exe
+golangapp
+.vscode
