@@ -393,3 +393,94 @@ func UpdateCompany(w http.ResponseWriter, r *http.Request, next http.HandlerFunc
 
 	next(w, r)
 }
+
+func AddBeneficial(w http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
+
+	var response services.Response
+	response.Status  = "error"
+
+	params := mux.Vars(r)
+	id := params["id"]
+
+	if id == "" {
+		response.Message = "Company id required"
+		respByt,_ := json.Marshal(response)
+
+		w.WriteHeader(400)
+		w.Write(respByt)
+		return
+	}
+
+	if bson.IsObjectIdHex(id) ==false {
+		response.Message = "Invalid company id"
+		respByt,_ := json.Marshal(response)
+
+		w.WriteHeader(400)
+		w.Write(respByt)
+		return
+	}
+
+	type Request struct {		
+        Name           string        `json:"name"`
+        Email          string        `json:"email"`      
+	}
+
+	b       := bytes.NewBuffer(make([]byte, 0))
+	reader  := io.TeeReader(r.Body, b)
+	decoder := json.NewDecoder(reader)
+	r.Body  = ioutil.NopCloser(b)
+
+	req := Request{}
+	err := decoder.Decode(&req)
+
+	if err != nil {
+		response.Message = "Invalid add beneficial object"
+		respByt,_:= json.Marshal(response)
+
+		w.WriteHeader(400)
+		w.Write(respByt)
+		return
+	}	
+
+	req.Name  = strings.TrimSpace(req.Name)
+	req.Email = strings.TrimSpace(req.Email)	
+
+	//Validate fields
+	if (req.Name == "") {
+		response.Message = "Beneficial name is invalid"
+		respByt,_ := json.Marshal(response)
+
+		w.WriteHeader(400)
+		w.Write(respByt)
+		return
+	}
+
+	if (req.Name != "" && len(req.Name)<2){
+		response.Message = "Beneficial name should contain atleast of 2 letters"
+		respByt,_ := json.Marshal(response)
+
+		w.WriteHeader(400)
+		w.Write(respByt)
+		return
+	}
+	
+	if (req.Email == "") {
+		response.Message = "Beneficial email is invalid"
+		respByt,_ := json.Marshal(response)
+
+		w.WriteHeader(400)
+		w.Write(respByt)
+		return
+	}
+	
+	if(req.Email!= "" && !govalidator.IsEmail(req.Email)){
+		response.Message = "Invalid company email"
+		respByt,_ := json.Marshal(response)
+
+		w.WriteHeader(400)
+		w.Write(respByt)
+		return
+	}	
+
+	next(w, r)
+}

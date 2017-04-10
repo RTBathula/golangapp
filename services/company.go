@@ -106,7 +106,7 @@ func CreateNew(newCompany NewCompany) (Response,error) {
     company.CreatedAt = time.Now().Unix()
     company.UpdatedAt = time.Now().Unix() 
 
-    company.Name        = newCompany.Name
+    company.Name        = strings.TrimSpace(newCompany.Name)
     company.Address     = newCompany.Address
     company.City        = newCompany.City
     company.Country     = newCompany.Country
@@ -273,5 +273,70 @@ func UpdateCompany(id string,address string,city string,country string,email str
     response.Status  = "success" 
     response.Message = "Successfully update the company"
     response.Data    = company
+    return response,nil        
+}
+
+/*Desc   : Add beneficial
+  Params : companyId, {name,email}
+  Returns: Promise
+           Resolve->new company
+           Reject->Error on findOneAndUpdate()
+*/
+func AddBeneficial(id string,name string,email string) (Response,error) { 
+
+    var (
+        response Response
+        err error
+    )    
+
+    //Get databaseName
+    keysJson      := helpers.GetConfigKeys()
+    envVariable   := helpers.GetEnvVariable()
+    databaseName,_:=keysJson.String(envVariable,"databaseName") 
+
+    //Get mongoSession
+    mangoSession:=databases.GetMongoSession()
+    sessionCopy := mangoSession.Copy()
+    defer sessionCopy.Close()      
+
+    var company Company
+    col:=sessionCopy.DB(databaseName).C("company") 
+
+    checkBenficialExistQuery:=bson.M{"$elemMatch": bson.M{"email" : email}}
+    query:=bson.M{"_id": bson.ObjectIdHex(id),"beneficials": checkBenficialExistQuery}
+
+    err = col.Find(query).One(&company)
+    if (err == nil && company.Name!=""){
+        response.Status  = "error" 
+        response.Message = "Beneficial already exist with email:"+ email  
+        return response,errors.New("Beneficial already exist with email:"+ email)
+    } 
+
+    var updateObj bson.M
+    updateObj = make(map[string]interface {})
+    updateObj["updatedAt"] = time.Now().Unix() 
+    
+    pushObj:= bson.M{"beneficials": bson.M{"name":name,"email":email}}       
+
+    newSet := mgo.Change{
+        Update: bson.M{"$set": updateObj,"$push": pushObj},
+        ReturnNew: true,
+    }    
+         
+    _, err = col.Find(bson.M{"_id":bson.ObjectIdHex(id)}).Apply(newSet, &company)
+    if (err!= nil){
+        response.Status  = "error" 
+        response.Message = "Unable to add the beneficial with given company id and beneficial object."
+        return response,err
+    } 
+   
+    replyData:=map[string]string{
+        "name"  : name,
+        "email" : email,
+    }
+
+    response.Status  = "success" 
+    response.Message = "Successfully added the new beneficial"
+    response.Data    = replyData
     return response,nil        
 }

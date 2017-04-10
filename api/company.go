@@ -40,9 +40,10 @@ func CompanyApi(r *mux.Router) {
 		negroni.Wrap(UpdateCompany),
 	)).Methods("PUT")
 
-	/*	
-	r.HandleFunc("/company/{id}/update-company", updateCompany).Methods("PUT")	
-	r.HandleFunc("/company/{id}/add-beneficial", addBeneficial).Methods("PUT")	*/
+	r.Handle("/company/{id}/add-beneficial",negroni.New(
+		negroni.HandlerFunc(validations.AddBeneficial),
+		negroni.Wrap(AddBeneficial),
+	)).Methods("PUT")
 }
 
 
@@ -136,6 +137,35 @@ var UpdateCompany = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request
 	decoder.Decode(&req)
 
 	resp, err := services.UpdateCompany(id,req.Address,req.City,req.Country,req.Email,req.Phone)
+	respByt,_:= json.Marshal(resp)
+
+	if err != nil {		
+		w.WriteHeader(400)
+		w.Write(respByt)
+		return
+	}
+	
+	w.WriteHeader(200)
+	w.Write(respByt)
+	return
+})
+
+
+var AddBeneficial = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+
+	params := mux.Vars(r)
+	id := params["id"]
+
+	type Request struct {		
+        Name           string        `json:"name"`
+        Email          string        `json:"email"`      
+	}
+
+	var req Request
+	decoder := json.NewDecoder(r.Body)	
+	decoder.Decode(&req)
+
+	resp, err := services.AddBeneficial(id,req.Name,req.Email)
 	respByt,_:= json.Marshal(resp)
 
 	if err != nil {		
