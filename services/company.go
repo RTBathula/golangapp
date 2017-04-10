@@ -3,7 +3,9 @@ package services
 import (  
     // Standard library packages 
     "fmt" 
-    "time"    
+    "time"  
+    "strings"  
+    "errors"
 
     // Third party packages
     "gopkg.in/mgo.v2/bson"
@@ -72,7 +74,10 @@ type (
 */
 func CreateNew(newCompany NewCompany) (Response,error) { 
 
-    var response Response
+    var (
+        response Response
+        err error
+    )    
 
     //Get databaseName
     keysJson      := helpers.GetConfigKeys()
@@ -82,9 +87,20 @@ func CreateNew(newCompany NewCompany) (Response,error) {
     //Get mongoSession
     mangoSession:=databases.GetMongoSession()
     sessionCopy := mangoSession.Copy()
-    defer sessionCopy.Close() 
-   
+    defer sessionCopy.Close()    
+
+    newCompany.Name = strings.TrimSpace(newCompany.Name)
+
     var company Company
+    col:=sessionCopy.DB(databaseName).C("company") 
+   
+    err = col.Find(bson.M{"name":newCompany.Name}).One(&company)
+    if (err == nil && company.Name!=""){
+        response.Status  = "error" 
+        response.Message = "Company with given name is already exist."
+        return response,errors.New("Company with given name is already exist.")
+    }   
+   
     company.Id        = bson.NewObjectId() 
     company.CreatedAt = time.Now().Unix()
     company.UpdatedAt = time.Now().Unix() 
@@ -95,11 +111,8 @@ func CreateNew(newCompany NewCompany) (Response,error) {
     company.Country     = newCompany.Country
     company.Directors   = newCompany.Directors
     company.Beneficials = newCompany.Beneficials
- 
-
-    col:=sessionCopy.DB(databaseName).C("company")    
-	err:= col.Insert(company)
-    
+       
+	err= col.Insert(company)    
     if err!= nil { 
         fmt.Println(err)        
         response.Status  = "error" 
