@@ -10,8 +10,8 @@ import (
 	"encoding/json"
 
 	// Third party packages
-	_"github.com/gorilla/mux"
-	_"gopkg.in/mgo.v2/bson"
+	"github.com/gorilla/mux"
+	"gopkg.in/mgo.v2/bson"
 	"github.com/asaskevich/govalidator"
 
 	// Custom packages
@@ -246,6 +246,150 @@ func CreateNew(w http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
 
 	    uniqueBeneficials = append(uniqueBeneficials,beneficial.Email)
     }
+
+	next(w, r)
+}
+
+func GetDetails(w http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
+
+	params := mux.Vars(r)
+	id := params["id"]
+
+	var response services.Response
+	response.Status  = "error"
+
+	if id == "" {
+		response.Message = "Company id required"
+		respByt,_ := json.Marshal(response)
+
+		w.WriteHeader(400)
+		w.Write(respByt)
+		return
+	}
+
+	if bson.IsObjectIdHex(id) ==false {
+		response.Message = "Invalid company id"
+		respByt,_ := json.Marshal(response)
+
+		w.WriteHeader(400)
+		w.Write(respByt)
+		return
+	}
+
+	next(w, r)
+}
+
+func UpdateCompany(w http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
+
+	var response services.Response
+	response.Status  = "error"
+
+	params := mux.Vars(r)
+	id := params["id"]
+
+	if id == "" {
+		response.Message = "Company id required"
+		respByt,_ := json.Marshal(response)
+
+		w.WriteHeader(400)
+		w.Write(respByt)
+		return
+	}
+
+	if bson.IsObjectIdHex(id) ==false {
+		response.Message = "Invalid company id"
+		respByt,_ := json.Marshal(response)
+
+		w.WriteHeader(400)
+		w.Write(respByt)
+		return
+	}
+
+	type Request struct {
+		Address           string        `json:"address"`
+        City              string        `json:"city"`
+        Country           string        `json:"country"`
+        Email             string        `json:"email"`
+        Phone             string        `json:"phone"`
+	}
+
+	b       := bytes.NewBuffer(make([]byte, 0))
+	reader  := io.TeeReader(r.Body, b)
+	decoder := json.NewDecoder(reader)
+	r.Body  = ioutil.NopCloser(b)
+
+	req := Request{}
+	err := decoder.Decode(&req)
+
+	if err != nil {
+		response.Message = "Invalid update company object"
+		respByt,_:= json.Marshal(response)
+
+		w.WriteHeader(400)
+		w.Write(respByt)
+		return
+	}
+	
+	req.Address = strings.TrimSpace(req.Address)
+	req.City    = strings.TrimSpace(req.City)
+	req.Country = strings.TrimSpace(req.Country)
+	req.Email   = strings.TrimSpace(req.Email)
+	req.Phone   = strings.TrimSpace(req.Phone)
+
+	//Validate fields
+	if (req.Address == "" && req.City == "" && req.Country == "" && req.Email == "" && req.Phone == "") {
+		response.Message = "Invalid update company object"
+		respByt,_ := json.Marshal(response)
+
+		w.WriteHeader(400)
+		w.Write(respByt)
+		return
+	}
+
+	if (req.Address != "" && len(req.Address)<2){
+		response.Message = "Company address should contain atleast of 2 letters"
+		respByt,_ := json.Marshal(response)
+
+		w.WriteHeader(400)
+		w.Write(respByt)
+		return
+	}
+	
+	if (req.City != "" && len(req.City)<2){
+		response.Message = "Company city should contain atleast of 2 letters"
+		respByt,_ := json.Marshal(response)
+
+		w.WriteHeader(400)
+		w.Write(respByt)
+		return
+	}
+
+	if (req.Country != "" && len(req.Country)<2){
+		response.Message = "Company country should contain atleast of 2 letters"
+		respByt,_ := json.Marshal(response)
+
+		w.WriteHeader(400)
+		w.Write(respByt)
+		return
+	}
+	
+	if(req.Email!= "" && !govalidator.IsEmail(req.Email)){
+		response.Message = "Invalid company email"
+		respByt,_ := json.Marshal(response)
+
+		w.WriteHeader(400)
+		w.Write(respByt)
+		return
+	}
+	
+	if(req.Phone!= "" && len(req.Phone)<9){
+		response.Message = "Company phone should atleast of 9 digits"
+		respByt,_ := json.Marshal(response)
+
+		w.WriteHeader(400)
+		w.Write(respByt)
+		return
+	}	
 
 	next(w, r)
 }

@@ -9,6 +9,7 @@ import (
 
     // Third party packages
     "gopkg.in/mgo.v2/bson"
+    "gopkg.in/mgo.v2"
 
     //Custom packages     
     "github.com/rtbathula/golangapp/databases" 
@@ -122,6 +123,155 @@ func CreateNew(newCompany NewCompany) (Response,error) {
    
     response.Status  = "success" 
     response.Message = "Successfully created a company"
+    response.Data    = company
+    return response,nil        
+}
+
+
+/*Desc   : Get company details
+  Params : company id
+  Returns: Promise
+           Resolve->company details
+           Reject->Error on find() or document not found
+*/
+func GetDetails(id string) (Response,error) { 
+
+    var (
+        response Response
+        err error
+    )    
+
+    //Get databaseName
+    keysJson      := helpers.GetConfigKeys()
+    envVariable   := helpers.GetEnvVariable()
+    databaseName,_:=keysJson.String(envVariable,"databaseName") 
+
+    //Get mongoSession
+    mangoSession:=databases.GetMongoSession()
+    sessionCopy := mangoSession.Copy()
+    defer sessionCopy.Close()      
+
+    var company Company
+    col:=sessionCopy.DB(databaseName).C("company") 
+   
+    err = col.Find(bson.M{"_id": bson.ObjectIdHex(id)}).One(&company)
+    if (err!= nil){
+        response.Status  = "error" 
+        response.Message = "Unable to find company with given company id. Please check company id!"
+        return response,err
+    } 
+   
+    response.Status  = "success" 
+    response.Message = "Successfully fetched the company details"
+    response.Data    = company
+    return response,nil        
+}
+
+
+/*Desc   : Get company list
+  Params : skip,limit
+  Returns: Promise
+           Resolve->company list
+           Reject->Error on find()
+*/
+func GetList(skip int,limit int) (Response,error) { 
+
+    var (
+        response Response
+        err error
+    )    
+
+    //Get databaseName
+    keysJson      := helpers.GetConfigKeys()
+    envVariable   := helpers.GetEnvVariable()
+    databaseName,_:=keysJson.String(envVariable,"databaseName") 
+
+    //Get mongoSession
+    mangoSession:=databases.GetMongoSession()
+    sessionCopy := mangoSession.Copy()
+    defer sessionCopy.Close()      
+
+    var list []Company
+    col:=sessionCopy.DB(databaseName).C("company") 
+   
+    err = col.Find(bson.M{}).Limit(limit).Skip(skip).All(&list)  
+    if (err!= nil){
+        response.Status  = "error" 
+        response.Message = "Unable to get the company list."
+        return response,err
+    } 
+   
+    response.Status  = "success" 
+    response.Message = "Successfully fetched the company list"
+    response.Data    = list
+    return response,nil        
+}
+
+
+/*Desc   : Update company info
+  Params : companyId, {address,city,country,email,phone}
+  Returns: Promise
+           Resolve->new company
+           Reject->Error on findOneAndUpdate()
+*/
+func UpdateCompany(id string,address string,city string,country string,email string,phone string) (Response,error) { 
+
+    var (
+        response Response
+        err error
+    )    
+
+    //Get databaseName
+    keysJson      := helpers.GetConfigKeys()
+    envVariable   := helpers.GetEnvVariable()
+    databaseName,_:=keysJson.String(envVariable,"databaseName") 
+
+    //Get mongoSession
+    mangoSession:=databases.GetMongoSession()
+    sessionCopy := mangoSession.Copy()
+    defer sessionCopy.Close()      
+
+    var updateObj bson.M
+    updateObj = make(map[string]interface {})
+    updateObj["updatedAt"] = time.Now().Unix() 
+
+    if(address!=""){
+        updateObj["address"] = address
+    } 
+
+    if(city!=""){
+        updateObj["city"]    = city
+    } 
+
+    if(country!=""){
+        updateObj["country"] = country
+    } 
+
+    if(email!=""){
+        updateObj["email"]   = email
+    } 
+
+    if(phone!=""){
+        updateObj["phone"]   = phone
+    }    
+
+    newSet := mgo.Change{
+        Update: bson.M{"$set": updateObj},
+        ReturnNew: true,
+    }
+
+    var company Company
+    col:=sessionCopy.DB(databaseName).C("company") 
+         
+    _, err = col.Find(bson.M{"_id":bson.ObjectIdHex(id)}).Apply(newSet, &company)
+    if (err!= nil){
+        response.Status  = "error" 
+        response.Message = "Unable to update the company with given company id and update object."
+        return response,err
+    } 
+   
+    response.Status  = "success" 
+    response.Message = "Successfully update the company"
     response.Data    = company
     return response,nil        
 }
