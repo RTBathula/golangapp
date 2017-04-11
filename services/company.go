@@ -16,11 +16,13 @@ import (
     "github.com/rtbathula/golangapp/helpers" 
 )
 
+
+
 type (  
      Company struct { 
         Id                bson.ObjectId `json:"_id,omitempty" bson:"_id,omitempty"`
-        CreatedAt         int64     `json:"createdAt" bson:"createdAt"`
-        UpdatedAt         int64     `json:"updatedAt" bson:"updatedAt"`   
+        CreatedAt         time.Time     `json:"createdAt" bson:"createdAt"`
+        UpdatedAt         time.Time     `json:"updatedAt" bson:"updatedAt"`   
 
         Name              string        `json:"name" bson:"name"` 
         Address           string        `json:"address" bson:"address"`
@@ -100,8 +102,8 @@ func CreateNew(newCompany NewCompany) (Response,error) {
     }   
    
     company.Id        = bson.NewObjectId() 
-    company.CreatedAt = time.Now().Unix()
-    company.UpdatedAt = time.Now().Unix() 
+    company.CreatedAt = time.Now()
+    company.UpdatedAt = time.Now() 
 
     company.Name        = strings.TrimSpace(newCompany.Name)
     company.Address     = newCompany.Address
@@ -222,7 +224,7 @@ func UpdateCompany(id string,address string,city string,country string,email str
 
     var updateObj bson.M
     updateObj = make(map[string]interface {})
-    updateObj["updatedAt"] = time.Now().Unix() 
+    updateObj["updatedAt"] = time.Now()
 
     if(address!=""){
         updateObj["address"] = address
@@ -300,7 +302,7 @@ func AddBeneficial(id string,name string,email string) (Response,error) {
 
     var updateObj bson.M
     updateObj = make(map[string]interface {})
-    updateObj["updatedAt"] = time.Now().Unix() 
+    updateObj["updatedAt"] = time.Now()
     
     pushObj:= bson.M{"beneficials": bson.M{"name":name,"email":email}}       
 
