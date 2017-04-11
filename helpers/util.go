@@ -3,6 +3,7 @@ import (
     // Standard library packages    
     "fmt"
     "os"
+    "path/filepath"
     "encoding/json"
     "io/ioutil"    
 
@@ -11,7 +12,10 @@ import (
 )
 
 func GetConfigKeys()  *jsonq.JsonQuery{
-    file, err := ioutil.ReadFile("./config/keys.json")
+   
+    configPath,_:=filepath.Abs("src/github.com/rtbathula/golangapp/config/keys.json")
+
+    file, err := ioutil.ReadFile(configPath)
     if err != nil {
         fmt.Println(err)
     }     
