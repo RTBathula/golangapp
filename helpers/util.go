@@ -13,7 +13,7 @@ import (
 
 func GetConfigKeys()  *jsonq.JsonQuery{
    
-    configPath,_:=filepath.Abs("src/github.com/rtbathula/golangapp/config/keys.json")
+    configPath,_:=filepath.Abs("config/keys.json")
 
     file, err := ioutil.ReadFile(configPath)
     if err != nil {
