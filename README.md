@@ -2,7 +2,7 @@
 Clearhaus test project
 
 # Hosted URL
-http://golangcompanyapi.herokuapp.com/
+http://golangcompanyapi.herokuapp.com
 
 # Trivia
 Created a separate folder especially for validations. Validations are done for every end point via middleware style. All the API calls respond in same style, giving consistency and symmetry to response either errors or success responses. 
