@@ -55,12 +55,12 @@ heroku ps:scale web=1
 For more info, look here https://devcenter.heroku.com/articles/container-registry-and-runtime
 
 # API End points and usage
-## Create company POST -> http://localhost:1447/company
+## Create company POST -> http://localhost:3000/company
 
 > Example CURL Request:
 
 ```
-curl -X POST -H "Accept: application/json" -H "Content-Type: application/json" -d '{"name":"starbucks","address":"costanera center","city":"santiago","country":"chile","email":"rtbathula@sbucks.com","phone":"123456789","directors":[{"name":"rtbathula","email":"director1@sbucks.com"}],"beneficials":[{"name":"hello","email":"beneficial1@sbucks.com"}]}' http://localhost:1447/company
+curl -X POST -H "Accept: application/json" -H "Content-Type: application/json" -d '{"name":"starbucks","address":"costanera center","city":"santiago","country":"chile","email":"rtbathula@sbucks.com","phone":"123456789","directors":[{"name":"rtbathula","email":"director1@sbucks.com"}],"beneficials":[{"name":"hello","email":"beneficial1@sbucks.com"}]}' http://localhost:3000/company
 
 ```
 
@@ -95,12 +95,12 @@ name              | string      |  name
 email  | string      | email
 
 
-## Get company details GET -> http://localhost:1447/company/{companyid}
+## Get company details GET -> http://localhost:3000/company/{companyid}
 
 > Example CURL Request:
 
 ```
-curl -X GET  http://localhost:1447/company/{companyid}
+curl -X GET  http://localhost:3000/company/{companyid}
 ```
 
 > Result:
@@ -113,12 +113,12 @@ curl -X GET  http://localhost:1447/company/{companyid}
 }
 ```
 
-## Get company list GET -> http://localhost:1447/company?skip=0&limit=3
+## Get company list GET -> http://localhost:3000/company?skip=0&limit=3
 
 > Example CURL Request:
 
 ```
-curl -X GET  http://localhost:1447/company
+curl -X GET  http://localhost:3000/company
 ```
 
 > Result:
@@ -137,12 +137,12 @@ Parameter                   | Type        | Description
 skip              | integer      |  0
 limit  | integer      | 2
 
-## Update company PUT -> http://localhost:1447/company/{companyid}/update-company
+## Update company PUT -> http://localhost:3000/company/{companyid}/update-company
 
 > Example CURL Request:
 
 ```
-curl -X PUT -H "Accept: application/json" -H "Content-Type: application/json" -d '{"address":"hyderabad","city":"hyderabad","country":"india","email":"new@gmail.com","phone":"123456789"}' http://localhost:1447/company/{companyid}/update-company
+curl -X PUT -H "Accept: application/json" -H "Content-Type: application/json" -d '{"address":"hyderabad","city":"hyderabad","country":"india","email":"new@gmail.com","phone":"123456789"}' http://localhost:3000/company/{companyid}/update-company
 
 ```
 
@@ -167,12 +167,12 @@ email  | string      | company email
 phone              | string      | company phone
 
 
-## Add beneficial PUT -> http://localhost:1447/company/{companyid}/add-beneficial
+## Add beneficial PUT -> http://localhost:3000/company/{companyid}/add-beneficial
 
 > Example CURL Request:
 
 ```
-curl -X PUT -H "Accept: application/json" -H "Content-Type: application/json" -d '{"name":"beneficial name","email":"beneficial@sbucks.com"}' http://localhost:1447/company/{companyid}/add-beneficial
+curl -X PUT -H "Accept: application/json" -H "Content-Type: application/json" -d '{"name":"beneficial name","email":"beneficial@sbucks.com"}' http://localhost:3000/company/{companyid}/add-beneficial
 
 ```
 
