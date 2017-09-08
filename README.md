@@ -1,5 +1,4 @@
 # Golang company api
-Clearhaus test project
 
 # Hosted URL
 http://golangcompanyapi.herokuapp.com
